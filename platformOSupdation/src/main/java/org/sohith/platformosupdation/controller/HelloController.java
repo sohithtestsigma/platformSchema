@@ -1,7 +1,9 @@
 package org.sohith.platformosupdation.controller;
 
+import org.sohith.platformosupdation.service.browserstack.BSPlatformBrowserService;
 import org.sohith.platformosupdation.service.browserstack.BSPlatformDeviceMobileService;
 import org.sohith.platformosupdation.service.browserstack.BSPlatformDeviceMobileWebService;
+import org.sohith.platformosupdation.service.lambdatest.LTPlatformBrowserService;
 import org.sohith.platformosupdation.service.lambdatest.LTPlatformDeviceMobileService;
 import org.sohith.platformosupdation.service.lambdatest.LTPlatformDeviceMobileWebService;
 import org.sohith.platformosupdation.service.sauceLabs.SLPlatformBrowserService;
@@ -27,19 +29,31 @@ public class HelloController {
   private SLPlatformDeviceMobileWebService slPlatformDeviceMobileWebService;
   @Autowired
   private SLPlatformBrowserService slPlatformBrowserService;
+  @Autowired
+  private LTPlatformBrowserService ltPlatformBrowserService;
+  @Autowired
+  private BSPlatformBrowserService bsPlatformBrowserService;
 
 
 
   @GetMapping("/hello")
   public String sayHello() {
-//    slPlatformDeviceMobileService.syncDevicesFromSauceLabs();
+
 //    bsPlatformDeviceMobileService.syncDevicesFromSauceLabs();
+//    bsPlatformBrowserService.syncDevicesFromBrowserStack();
+//    bsPlatformDeviceMobileWebService.syncDevicesFromBrowserStack();
+
 //    ltpPlatformDeviceMobileService.syncDevicesFromSauceLabs();
 //    ltpPlatformDeviceMobileWebService.syncDevicesFromLambdaTest();
-//    bsPlatformDeviceMobileWebService.syncDevicesFromBrowserStack();
-//      slPlatformDeviceMobileWebService.syncDevicesFromSauceLabs();
+//    ltPlatformBrowserService.syncDevicesFromLambdaTest();
+//
+    slPlatformDeviceMobileWebService.syncDevicesFromSauceLabs();
     slPlatformBrowserService.syncDevicesFromSauceLabs();
+    slPlatformDeviceMobileService.syncDevicesFromSauceLabs();
+
+
     return "Hello";
+
 
   }
 }

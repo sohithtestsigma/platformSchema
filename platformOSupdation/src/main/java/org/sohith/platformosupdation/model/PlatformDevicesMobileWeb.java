@@ -27,8 +27,6 @@ public class PlatformDevicesMobileWeb {
   @Column(name = "browser_name")
   private String browserName;
 
-  @Column(name = "browser_version")
-  private String browserVersion;
 
   @Column(name = "is_bs_supported")
   private Boolean isBsSupported;

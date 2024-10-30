@@ -1,0 +1,163 @@
+
+drop database platformSchemaRefactor;
+CREATE DATABASE platformSchemaRefactor;
+
+use database platformSchemaRefactor;
+
+drop table platform_browsers;
+drop table bs_platform_browsers;
+drop table lt_platform_browsers;
+drop table sl_platform_browsers
+
+-- 1. Create the Display Table for Web Applications
+CREATE TABLE platform_browsers (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    platform_key VARCHAR(255) NOT NULL UNIQUE,
+    os_name VARCHAR(255),
+    os_version VARCHAR(255),
+    browser_name VARCHAR(255),
+    browser_version VARCHAR(255),
+    is_bs_supported BOOLEAN,
+    is_lt_supported BOOLEAN,
+    is_sl_supported BOOLEAN,
+    helix_supported BOOLEAN,
+    INDEX (platform_key)
+);
+
+-- 2. Create Lab-Specific Table for Web Applications (BrowserStack)
+CREATE TABLE bs_platform_browsers (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    platform_key VARCHAR(255) NOT NULL,
+    os_name VARCHAR(255),
+    os_version VARCHAR(255),
+    browser_name VARCHAR(255),
+    browser_version VARCHAR(255),
+    FOREIGN KEY (platform_key) REFERENCES platform_browsers(platform_key),
+    INDEX (platform_key)
+);
+
+-- 3. Create Lab-Specific Table for Web Applications (LambdaTest)
+CREATE TABLE lt_platform_browsers (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    platform_key VARCHAR(255) NOT NULL,
+    os_name VARCHAR(255),
+    os_version VARCHAR(255),
+    browser_name VARCHAR(255),
+    browser_version VARCHAR(255),
+    FOREIGN KEY (platform_key) REFERENCES platform_browsers(platform_key),
+    INDEX (platform_key)
+);
+
+-- 4. Create Lab-Specific Table for Web Applications (Sauce Labs)
+CREATE TABLE sl_platform_browsers (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    platform_key VARCHAR(255) NOT NULL,
+    os_name VARCHAR(255),
+    os_version VARCHAR(255),
+    browser_name VARCHAR(255),
+    browser_version VARCHAR(255),
+    FOREIGN KEY (platform_key) REFERENCES platform_browsers(platform_key),
+    INDEX (platform_key)
+);
+
+-- 5. Create the Display Table for Native Applications
+CREATE TABLE platform_devices_mobile (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    platform_key VARCHAR(255) NOT NULL UNIQUE,
+    os_name VARCHAR(255),
+    os_version VARCHAR(255),
+    device_name VARCHAR(255),
+    is_bs_supported BOOLEAN,
+    is_lt_supported BOOLEAN,
+    is_sl_supported BOOLEAN,
+    helix_supported BOOLEAN,
+    INDEX (platform_key)
+);
+
+-- 6. Create Lab-Specific Table for Native Applications (BrowserStack)
+CREATE TABLE bs_platform_devices_mobile (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    platform_key VARCHAR(255) NOT NULL,
+    os_name VARCHAR(255),
+    os_version VARCHAR(255),
+    device_name VARCHAR(255),
+    FOREIGN KEY (platform_key) REFERENCES platform_devices_mobile(platform_key),
+    INDEX (platform_key)
+);
+
+-- 7. Create Lab-Specific Table for Native Applications (LambdaTest)
+CREATE TABLE lt_platform_devices_mobile (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    platform_key VARCHAR(255) NOT NULL,
+    os_name VARCHAR(255),
+    os_version VARCHAR(255),
+    device_name VARCHAR(255),
+    FOREIGN KEY (platform_key) REFERENCES platform_devices_mobile(platform_key),
+    INDEX (platform_key)
+);
+
+-- 8. Create Lab-Specific Table for Native Applications (Sauce Labs)
+CREATE TABLE sl_platform_devices_mobile (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    platform_key VARCHAR(255) NOT NULL,
+    os_name VARCHAR(255),
+    os_version VARCHAR(255),
+    device_name VARCHAR(255),
+    FOREIGN KEY (platform_key) REFERENCES platform_devices_mobile(platform_key),
+    INDEX (platform_key)
+);
+
+-- 9. Create the Display Table for MobileWeb Applications
+CREATE TABLE platform_devices_mobile_web (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    platform_key VARCHAR(255) NOT NULL UNIQUE,
+    os_name VARCHAR(255),
+    os_version VARCHAR(255),
+    device_name VARCHAR(255),
+    browser_name VARCHAR(255),
+    is_bs_supported BOOLEAN,
+    is_lt_supported BOOLEAN,
+    is_sl_supported BOOLEAN,
+    helix_supported BOOLEAN,
+    INDEX (platform_key)
+);
+
+-- 10. Create Lab-Specific Table for MobileWeb Applications (BrowserStack)
+CREATE TABLE bs_platform_devices_mobile_web (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    platform_key VARCHAR(255) NOT NULL,
+    os_name VARCHAR(255),
+    os_version VARCHAR(255),
+    device_name VARCHAR(255),
+    browser_name VARCHAR(255),
+    FOREIGN KEY (platform_key) REFERENCES platform_devices_mobile_web(platform_key),
+    INDEX (platform_key)
+);
+
+-- 11. Create Lab-Specific Table for MobileWeb Applications (LambdaTest)
+CREATE TABLE lt_platform_devices_mobile_web (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    platform_key VARCHAR(255) NOT NULL,
+    os_name VARCHAR(255),
+    os_version VARCHAR(255),
+    device_name VARCHAR(255),
+    browser_name VARCHAR(255),
+    FOREIGN KEY (platform_key) REFERENCES platform_devices_mobile_web(platform_key),
+    INDEX (platform_key)
+);
+
+-- 12. Create Lab-Specific Table for MobileWeb Applications (Sauce Labs)
+CREATE TABLE sl_platform_devices_mobile_web (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    platform_key VARCHAR(255) NOT NULL,
+    os_name VARCHAR(255),
+    os_version VARCHAR(255),
+    device_name VARCHAR(255),
+    browser_name VARCHAR(255),
+    FOREIGN KEY (platform_key) REFERENCES platform_devices_mobile_web(platform_key),
+    INDEX (platform_key)
+);
+
+
+
+

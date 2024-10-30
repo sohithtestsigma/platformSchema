@@ -28,8 +28,6 @@ public class BsPlatformDevicesMobileWeb {
   @Column(name = "browser_name")
   private String browserName;
 
-  @Column(name = "browser_version")
-  private String browserVersion;
 
   @ManyToOne
   @JoinColumn(name = "platform_key", referencedColumnName = "platform_key", insertable = false, updatable = false)

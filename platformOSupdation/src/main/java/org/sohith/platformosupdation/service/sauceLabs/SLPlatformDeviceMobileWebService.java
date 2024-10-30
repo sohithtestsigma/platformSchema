@@ -67,7 +67,7 @@ public class SLPlatformDeviceMobileWebService {
             String key = generateKey(generalizedOsName, osVersion, generalizedDeviceName, browserName);
 
             saveToPlatformDevices(generalizedOsName, osVersion, generalizedDeviceName, browserName, key);
-            saveToSlPlatformDevices(generalizedOsName, osVersion, deviceName, browserName, key);
+            saveToSlPlatformDevices(os, osVersion, deviceName, browserName, key);
           });
     } else {
       log.warn("No device data found in Sauce Labs response.");

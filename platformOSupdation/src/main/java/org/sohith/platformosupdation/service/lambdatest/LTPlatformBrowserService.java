@@ -7,7 +7,6 @@ import org.sohith.platformosupdation.repo.lambdatest.LtPlatformBrowsersRepositor
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -16,19 +15,14 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+
 
 @Service
 public class LTPlatformBrowserService {
 
-  @Value("${lambda.test.web.api.url}")
+  @Value("${lambdatest.labs.web.api.url}")
   private String apiUrl;
 
-  @Value("${lambda.test.api.username}")
-  private String username;
-
-  @Value("${lambda.test.api.accessKey}")
-  private String accessKey;
 
   @Autowired
   private RestTemplate restTemplate;
@@ -39,59 +33,70 @@ public class LTPlatformBrowserService {
 
   @Transactional
   public void syncDevicesFromLambdaTest() {
-    HttpHeaders headers = new HttpHeaders();
-    headers.setBasicAuth(username, accessKey);
-    HttpEntity<String> entity = new HttpEntity<>(headers);
+    HttpEntity<String> entity = new HttpEntity<>(null);
 
     ResponseEntity<Map> response = restTemplate.exchange(apiUrl, HttpMethod.GET, entity, Map.class);
     Map<String, Object> responseBody = response.getBody();
 
     if (responseBody != null && responseBody.containsKey("platforms")) {
-      Map<String, List<Map<String, Object>>> platforms = (Map<String, List<Map<String, Object>>>) responseBody.get("platforms");
-      platforms.values().forEach(platformList -> platformList.forEach(platformData -> {
+      Map<String, List<Map<String, Object>>> platformsByCategory = (Map<String, List<Map<String, Object>>>) responseBody.get("platforms");
 
-        String platform = (String) platformData.get("platform");
-        String osName = platform.split(" ")[0];
-        String osVersion = platform.substring(platform.indexOf(" ") + 1);
+      if (platformsByCategory.containsKey("Desktop")) {
+        List<Map<String, Object>> desktopPlatforms = platformsByCategory.get("Desktop");
 
-        List<Map<String, String>> browsers = (List<Map<String, String>>) platformData.get("browsers");
 
-        // Loop through each browser for the platform
-        browsers.forEach(browser -> {
-          String browserName = browser.get("browser_name");
-          String browserVersion = browser.get("version");
+        desktopPlatforms.forEach(platformData -> {
+          String platform = (String) platformData.get("platform");
+          String osName = platform.split(" ")[0];
+          String osVersion = platform.substring(platform.indexOf(" ") + 1);
 
-          String generalizedOsName = normalizeOSName(osName);
-          String generalizedBrowser = normalizeBrowserName(browserName);
-          String generalizedOsVersion = normalizeOSVersion(browserVersion);
-          String platformKey = generatePlatformKey(osName, osVersion, browserName, browserVersion);
+          List<Map<String, String>> browsers = (List<Map<String, String>>) platformData.get("browsers");
 
-          saveToPlatformBrowsers(generalizedOsName, generalizedOsVersion, generalizedBrowser, browserVersion, platformKey);
-          saveToLtPlatformBrowsers(osName, osVersion, browserName, browserVersion, platformKey);
+          browsers.forEach(browser -> {
+            String browserName = browser.get("browser_name");
+            String browserVersion = browser.get("version");
+
+            String generalizedOsName = normalizeOSName(osName);
+            String generalizedBrowser = normalizeBrowserName(browserName);
+            String generalizedOsVersion = normalizeOSVersion(browserVersion);
+            String platformKey = generatePlatformKey(osName, osVersion, browserName, browserVersion);
+
+            saveToPlatformBrowsers(generalizedOsName, generalizedOsVersion, generalizedBrowser, browserVersion, platformKey);
+            saveToLtPlatformBrowsers(osName, osVersion, browserName, browserVersion, platformKey);
+          });
         });
-      }));
+      } else {
+        System.out.println("No Desktop platforms found in LambdaTest API.");
+      }
     } else {
       System.out.println("No data received from LambdaTest API.");
     }
   }
+
 
   private String generatePlatformKey(String osName, String osVersion, String browserName, String browserVersion) {
     return osName + "-" + osVersion + "-" + browserName + "-" + browserVersion;
   }
 
   private void saveToPlatformBrowsers(String osName, String osVersion, String browserName, String browserVersion, String platformKey) {
-    Optional<PlatformBrowsers> existingPlatform = platformBrowsersRepository.findByPlatformKey(platformKey);
-    if (existingPlatform.isEmpty()) {
-      PlatformBrowsers platformBrowsers = new PlatformBrowsers();
-      platformBrowsers.setPlatformKey(platformKey);
-      platformBrowsers.setOsName(osName);
-      platformBrowsers.setOsVersion(osVersion);
-      platformBrowsers.setBrowserName(browserName);
-      platformBrowsers.setBrowserVersion(browserVersion);
-      platformBrowsers.setIsLtSupported(true);
-      platformBrowsersRepository.save(platformBrowsers);
-    }
+    platformBrowsersRepository.findByPlatformKey(platformKey).ifPresentOrElse(
+        existingPlatform -> {
+          existingPlatform.setIsLtSupported(true);
+          platformBrowsersRepository.save(existingPlatform);
+        },
+        () -> {
+          PlatformBrowsers newPlatformBrowser = new PlatformBrowsers();
+          newPlatformBrowser.setPlatformKey(platformKey);
+          newPlatformBrowser.setOsName(osName);
+          newPlatformBrowser.setOsVersion(osVersion);
+          newPlatformBrowser.setBrowserName(browserName);
+          newPlatformBrowser.setBrowserVersion(browserVersion);
+          newPlatformBrowser.setIsLtSupported(true);
+          platformBrowsersRepository.save(newPlatformBrowser);
+        }
+    );
   }
+
 
   private void saveToLtPlatformBrowsers(String osName, String osVersion, String browserName, String browserVersion, String platformKey) {
     if (!ltPlatformBrowsersRepository.existsByPlatformKey(platformKey)) {
