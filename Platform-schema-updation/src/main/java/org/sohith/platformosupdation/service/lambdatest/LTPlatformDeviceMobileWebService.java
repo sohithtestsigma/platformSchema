@@ -1,6 +1,7 @@
 package org.sohith.platformosupdation.service.lambdatest;
 
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sohith.platformosupdation.model.PlatformDevicesMobileWeb;
 import org.sohith.platformosupdation.model.lambdatest.LtPlatformDevicesMobileWeb;
@@ -21,27 +22,24 @@ import java.util.Map;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class LTPlatformDeviceMobileWebService {
 
   @Value("${lambdatest.labs.mobileweb.api.url}")
   private String apiUrl;
 
-  @Autowired
-  private RestTemplate restTemplate;
-
-  @Autowired
-  private PlatformDevicesMobileWebRepository platformDeviceWebRepo;
-
-  @Autowired
-  private LtPlatformDevicesMobileWebRepository ltPlatformDeviceMobileWebRepo;
-  @Autowired
-  private PlatformGeneralizer platformGeneralizer;
+  private final RestTemplate restTemplate;
+  private final PlatformDevicesMobileWebRepository platformDeviceWebRepo;
+  private final LtPlatformDevicesMobileWebRepository ltPlatformDeviceMobileWebRepo;
+  private final PlatformGeneralizer platformGeneralizer;
 
   @Transactional
   public void syncDevicesFromLambdaTest() {
     HttpEntity<String> entity = new HttpEntity<>(null);
     ResponseEntity<Map> response = restTemplate.exchange(apiUrl, HttpMethod.GET, entity, Map.class);
     Map<String, Object> body = response.getBody();
+
+    log.info("In LTPlatformDeviceMobileWebService...");
 
     if (body != null) {
       body.forEach((osType, platformData) -> {
@@ -52,7 +50,6 @@ public class LTPlatformDeviceMobileWebService {
         brands.forEach(brandData -> {
           String brand = (String) brandData.get("brand");
           List<Map<String, Object>> devices = (List<Map<String, Object>>) brandData.get("devices");
-          log.info("Brand : {} Devices: {}", brand, devices.size());
           devices.forEach(device -> {
             String deviceName = (String) device.get("deviceName");
             String browserName = (String) device.get("browserId");

@@ -1,5 +1,6 @@
 package org.sohith.platformosupdation.service.browserstack;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sohith.platformosupdation.model.PlatformBrowsers;
 import org.sohith.platformosupdation.model.browserstack.BsPlatformBrowsers;
@@ -24,6 +25,7 @@ import java.util.Optional;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class BSPlatformBrowserService {
 
   @Value("${browserstack.labs.web.api.url}")
@@ -35,17 +37,11 @@ public class BSPlatformBrowserService {
   @Value("${browserstack.labs.api.accessKey}")
   private String accessKey;
 
-  @Autowired
-  private RestTemplate restTemplate;
-
-  @Autowired
-  private PlatformBrowsersRepository platformBrowsersRepository;
-
-  @Autowired
-  private BsPlatformBrowsersRepository bsPlatformBrowsersRepository;
-
-  @Autowired
-  private PlatformGeneralizer platformGeneralizer;
+  
+  private final RestTemplate restTemplate;
+  private final PlatformBrowsersRepository platformBrowsersRepository;
+  private final  BsPlatformBrowsersRepository bsPlatformBrowsersRepository;
+  private final PlatformGeneralizer platformGeneralizer;
 
   @Transactional
   public void syncDevicesFromBrowserStack() {
@@ -54,6 +50,8 @@ public class BSPlatformBrowserService {
 
     ResponseEntity<List> response = restTemplate.exchange(apiUrl, HttpMethod.GET, entity, List.class);
     List<Map<String, Object>> devices = response.getBody();
+
+    log.info("In BSPlatformBrowserService...");
 
     if (devices != null) {
       devices.stream()

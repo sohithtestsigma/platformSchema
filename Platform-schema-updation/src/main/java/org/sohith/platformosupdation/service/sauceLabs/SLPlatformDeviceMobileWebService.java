@@ -1,5 +1,6 @@
 package org.sohith.platformosupdation.service.sauceLabs;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sohith.platformosupdation.model.PlatformDevicesMobileWeb;
 import org.sohith.platformosupdation.model.sauceLabs.SlPlatformDevicesMobileWeb;
@@ -23,6 +24,7 @@ import java.util.Map;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SLPlatformDeviceMobileWebService {
 
   @Value("${sauce.labs.mobileweb.api.url}")
@@ -34,17 +36,10 @@ public class SLPlatformDeviceMobileWebService {
   @Value("${sauce.labs.api.accessKey}")
   private String apiAccessKey;
 
-  @Autowired
-  private RestTemplate restTemplate;
-
-  @Autowired
-  private PlatformDevicesMobileWebRepository platformDevicesRepo;
-
-  @Autowired
-  private SlPlatformDevicesMobileWebRepository slPlatformDevicesMobileWebRepo;
-
-  @Autowired
-  private PlatformGeneralizer platformGeneralizer;
+  private final  RestTemplate restTemplate;
+  private final  PlatformDevicesMobileWebRepository platformDevicesRepo;
+  private final  SlPlatformDevicesMobileWebRepository slPlatformDevicesMobileWebRepo;
+  private final  PlatformGeneralizer platformGeneralizer;
 
   @Transactional
   public void syncDevicesFromSauceLabs() {
@@ -53,6 +48,8 @@ public class SLPlatformDeviceMobileWebService {
 
     ResponseEntity<List> response = restTemplate.exchange(apiUrl, HttpMethod.GET, entity, List.class);
     List<Map<String, Object>> devices = response.getBody();
+
+    log.info("In SLPlatformDeviceMobileWebService....");
 
     if (devices != null) {
       devices

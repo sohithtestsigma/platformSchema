@@ -1,5 +1,6 @@
 package org.sohith.platformosupdation.service.lambdatest;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sohith.platformosupdation.model.PlatformDeviceMobile;
 import org.sohith.platformosupdation.model.lambdatest.LTPlatformDeviceMobile;
@@ -20,22 +21,16 @@ import java.util.Map;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class LTPlatformDeviceMobileService {
 
   @Value("${lambdatest.labs.mobile.api.url}")
   private String apiUrl;
 
-  @Autowired
-  private RestTemplate restTemplate;
-
-  @Autowired
-  private PlatformDeviceMobileRepository platformDeviceRepo;
-
-  @Autowired
-  private LTPlatformDeviceMobileRepository ltPlatformDeviceMobileRepository;
-
-  @Autowired
-  private PlatformGeneralizer generalizer;
+  private final RestTemplate restTemplate;
+  private final PlatformDeviceMobileRepository platformDeviceRepo;
+  private final LTPlatformDeviceMobileRepository ltPlatformDeviceMobileRepository;
+  private final PlatformGeneralizer generalizer;
 
   @Transactional
   public void syncDevicesFromSauceLabs() {
@@ -44,12 +39,13 @@ public class LTPlatformDeviceMobileService {
     ResponseEntity<Map> response = restTemplate.exchange(apiUrl, HttpMethod.GET, entity, Map.class);
     Map<String, Object> body = response.getBody();
 
+    log.info("In LTPlatformDeviceMobileService...");
+
     if (body != null && body.containsKey("platforms")) {
       Map<String, Object> platforms = (Map<String, Object>) body.get("platforms");
       List<Map<String, Object>> mobilePlatforms = (List<Map<String, Object>>) platforms.get("Mobile");
 
       if (mobilePlatforms != null) {
-        log.info("Found {} mobile platforms", mobilePlatforms.size());
 
 
         mobilePlatforms.forEach(platformData -> {

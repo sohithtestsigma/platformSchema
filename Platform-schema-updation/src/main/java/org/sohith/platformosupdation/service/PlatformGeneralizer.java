@@ -4,8 +4,31 @@ package org.sohith.platformosupdation.service;
 import org.sohith.platformosupdation.constants.PlatformConstants;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Service
 public class PlatformGeneralizer {
+  private static final Map<String, String> specialOsVersions = new HashMap<>();
+  static {
+    // Initialize the map with known special OS versions
+    specialOsVersions.put("xp", "5.1");
+    specialOsVersions.put("snow leopard", "10.6");
+    specialOsVersions.put("lion os", "10.7");
+    specialOsVersions.put("mountain lion", "10.8");
+    specialOsVersions.put("mavericks", "10.9");
+    specialOsVersions.put("yosemite", "10.10");
+    specialOsVersions.put("el capitan", "10.11");
+    specialOsVersions.put("sierra", "10.12");
+    specialOsVersions.put("high sierra", "10.13");
+    specialOsVersions.put("mojave", "10.14");
+    specialOsVersions.put("catalina", "10.15");
+    specialOsVersions.put("big sur", "11");
+    specialOsVersions.put("monterey", "12");
+    specialOsVersions.put("ventura", "13");
+    specialOsVersions.put("sonoma", "14");
+    specialOsVersions.put("sequoia", "15");
+  }
 
   public  String generalizeOsName(String os) {
     os = os.trim().toLowerCase();
@@ -17,7 +40,7 @@ public class PlatformGeneralizer {
       return PlatformConstants.LINUX_OS;
     } else if (os.contains("android")) {
       return PlatformConstants.ANDROID_OS;
-    } else if (os.contains("ios") || os.contains("apple")) {
+    } else if (os.contains("ios") || os.contains("apple") || os.contains("iphone") || os.contains("ipad")) {
       return PlatformConstants.IOS_OS;
     }
     return "Unknown OS";
@@ -43,8 +66,14 @@ public class PlatformGeneralizer {
     return "Unknown Browser";
   }
 
-  public  String generalizeVersion(String version) {
-    version = version.trim();
+  public String generalizeVersion(String version) {
+    version = version.trim().toLowerCase();
+
+    // Check if the version matches a special OS version
+    if (specialOsVersions.containsKey(version)) {
+      return specialOsVersions.get(version);
+    }
+
     // Match whole numbers like "16" or versions like "19.3" and "12.0"
     if (version.matches("\\d+")) {
       return version;

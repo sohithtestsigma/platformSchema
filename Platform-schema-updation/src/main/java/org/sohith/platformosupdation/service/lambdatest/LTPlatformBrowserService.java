@@ -1,5 +1,7 @@
 package org.sohith.platformosupdation.service.lambdatest;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.sohith.platformosupdation.model.PlatformBrowsers;
 import org.sohith.platformosupdation.model.lambdatest.LtPlatformBrowsers;
 import org.sohith.platformosupdation.repo.PlatformBrowsersRepository;
@@ -19,20 +21,17 @@ import java.util.Map;
 
 
 @Service
+@Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class LTPlatformBrowserService {
 
   @Value("${lambdatest.labs.web.api.url}")
   private String apiUrl;
 
-
-  @Autowired
-  private RestTemplate restTemplate;
-  @Autowired
-  private PlatformBrowsersRepository platformBrowsersRepository;
-  @Autowired
-  private LtPlatformBrowsersRepository ltPlatformBrowsersRepository;
-  @Autowired
-  private PlatformGeneralizer platformGeneralizer;
+  private final RestTemplate restTemplate;
+  private final PlatformBrowsersRepository platformBrowsersRepository;
+  private final LtPlatformBrowsersRepository ltPlatformBrowsersRepository;
+  private final PlatformGeneralizer platformGeneralizer;
 
   @Transactional
   public void syncDevicesFromLambdaTest() {
@@ -40,6 +39,8 @@ public class LTPlatformBrowserService {
 
     ResponseEntity<Map> response = restTemplate.exchange(apiUrl, HttpMethod.GET, entity, Map.class);
     Map<String, Object> responseBody = response.getBody();
+
+    log.info("In LTPlatformBrowserService...");
 
     if (responseBody != null && responseBody.containsKey("platforms")) {
       Map<String, List<Map<String, Object>>> platformsByCategory = (Map<String, List<Map<String, Object>>>) responseBody.get("platforms");

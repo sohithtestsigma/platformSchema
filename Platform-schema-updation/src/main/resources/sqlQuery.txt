@@ -2,12 +2,6 @@
 drop database platformSchemaRefactor;
 CREATE DATABASE platformSchemaRefactor;
 
-use database platformSchemaRefactor;
-
-drop table platform_browsers;
-drop table bs_platform_browsers;
-drop table lt_platform_browsers;
-drop table sl_platform_browsers
 
 -- 1. Create the Display Table for Web Applications
 CREATE TABLE platform_browsers (
@@ -103,6 +97,7 @@ CREATE TABLE sl_platform_devices_mobile (
     os_name VARCHAR(255),
     os_version VARCHAR(255),
     device_name VARCHAR(255),
+    device_id VARCHAR(255),
     FOREIGN KEY (platform_key) REFERENCES platform_devices_mobile(platform_key),
     INDEX (platform_key)
 );
@@ -142,6 +137,7 @@ CREATE TABLE lt_platform_devices_mobile_web (
     os_version VARCHAR(255),
     device_name VARCHAR(255),
     browser_name VARCHAR(255),
+    os_id VARCHAR(255),
     FOREIGN KEY (platform_key) REFERENCES platform_devices_mobile_web(platform_key),
     INDEX (platform_key)
 );
@@ -157,6 +153,15 @@ CREATE TABLE sl_platform_devices_mobile_web (
     FOREIGN KEY (platform_key) REFERENCES platform_devices_mobile_web(platform_key),
     INDEX (platform_key)
 );
+
+
+
+
+select * from platform_browsers where is_lt_supported = true and is_sl_supported = true and is_bs_supported = true;
+
+select * from platform_devices_mobile where is_lt_supported = true and is_sl_supported = true and is_bs_supported = true;
+
+select * from platform_devices_mobile_web where is_lt_supported = true and is_sl_supported = true and is_bs_supported = true;
 
 
 

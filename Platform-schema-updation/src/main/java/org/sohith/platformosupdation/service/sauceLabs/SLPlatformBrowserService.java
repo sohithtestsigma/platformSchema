@@ -1,5 +1,7 @@
 package org.sohith.platformosupdation.service.sauceLabs;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.sohith.platformosupdation.model.PlatformBrowsers;
 import org.sohith.platformosupdation.model.sauceLabs.SlPlatformBrowsers;
 import org.sohith.platformosupdation.repo.PlatformBrowsersRepository;
@@ -20,6 +22,8 @@ import java.util.Map;
 import java.util.Optional;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SLPlatformBrowserService {
 
   @Value("${sauce.labs.web.api.url}")
@@ -31,14 +35,10 @@ public class SLPlatformBrowserService {
   @Value("${sauce.labs.api.accessKey}")
   private String accessKey;
 
-  @Autowired
-  private RestTemplate restTemplate;
-  @Autowired
-  private PlatformBrowsersRepository platformBrowsersRepository;
-  @Autowired
-  private SlPlatformBrowsersRepository slPlatformBrowsersRepository;
-  @Autowired
-  private PlatformGeneralizer platformGeneralizer;
+  private final RestTemplate restTemplate;
+  private final PlatformBrowsersRepository platformBrowsersRepository;
+  private final SlPlatformBrowsersRepository slPlatformBrowsersRepository;
+  private final PlatformGeneralizer platformGeneralizer;
 
   @Transactional
   public void syncDevicesFromSauceLabs() {
@@ -48,6 +48,8 @@ public class SLPlatformBrowserService {
 
     ResponseEntity<List> response = restTemplate.exchange(apiUrl, HttpMethod.GET, entity, List.class);
     List<Map<String, Object>> devices = response.getBody();
+
+    log.info("In SLPlatformBrowserService...");
 
     if (devices != null) {
       devices.forEach(device -> {
