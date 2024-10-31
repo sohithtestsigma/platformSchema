@@ -5,6 +5,7 @@ import org.sohith.platformosupdation.model.PlatformDevicesMobileWeb;
 import org.sohith.platformosupdation.model.browserstack.BsPlatformDevicesMobileWeb;
 import org.sohith.platformosupdation.repo.PlatformDevicesMobileWebRepository;
 import org.sohith.platformosupdation.repo.browserstack.BsPlatformDevicesMobileWebRepository;
+import org.sohith.platformosupdation.service.PlatformGeneralizer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -41,6 +42,9 @@ public class BSPlatformDeviceMobileWebService {
   @Autowired
   private BsPlatformDevicesMobileWebRepository bsPlatformDevicesMobileWebRepo;
 
+  @Autowired
+  private PlatformGeneralizer platformGeneralizer;
+
   @Transactional
   public void syncDevicesFromBrowserStack() {
     HttpHeaders headers = createAuthHeaders();
@@ -57,11 +61,13 @@ public class BSPlatformDeviceMobileWebService {
             String browserName = (String) device.get("browser");
             String deviceName = (String) device.get("device");
 
-            String generalizedOsName = normalizeOSName(os);
-            String generalizedDeviceName = normalizeDeviceName(deviceName);
-            String key = generateKey(generalizedOsName, osVersion, generalizedDeviceName, browserName);
+            String generalizedOsName = platformGeneralizer.generalizeOsName(os);
+            String generalizedDeviceName = platformGeneralizer.generalizeDeviceModelName(deviceName);
+            String generalizedOsVersion = platformGeneralizer.generalizeVersion(osVersion);
+            String generalizedBrowserName = platformGeneralizer.generalizeBrowserName(browserName);
+            String key = platformGeneralizer.generatePlatformKey(generalizedOsName, generalizedOsVersion, generalizedDeviceName, generalizedBrowserName);
 
-            saveToPlatformDevices(generalizedOsName, osVersion, generalizedDeviceName, browserName, key);
+            saveToPlatformDevices(generalizedOsName, generalizedOsVersion, generalizedDeviceName, generalizedBrowserName, key);
             saveToBsPlatformDevices(os, osVersion, deviceName, browserName, key);
           });
     } else {
@@ -111,16 +117,5 @@ public class BSPlatformDeviceMobileWebService {
     bsPlatformDevicesMobileWebRepo.save(bsDevice);
   }
 
-  private String normalizeOSName(String os) {
-    return os.toLowerCase();
-  }
-
-  private String normalizeDeviceName(String deviceName) {
-    return deviceName.toLowerCase();
-  }
-
-  private String generateKey(String osName, String osVersion, String deviceName, String browserName) {
-    return osName + "-" + osVersion + "-" + deviceName + "-" + browserName;
-  }
 }
 

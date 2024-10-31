@@ -5,6 +5,7 @@ import org.sohith.platformosupdation.model.PlatformDeviceMobile;
 import org.sohith.platformosupdation.model.sauceLabs.SlPlatformDeviceMobile;
 import org.sohith.platformosupdation.repo.PlatformDeviceMobileRepository;
 import org.sohith.platformosupdation.repo.sauceLabs.SlPlatformDeviceMobileRepository;
+import org.sohith.platformosupdation.service.PlatformGeneralizer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -40,6 +41,9 @@ public class SLPlatformDeviceMobileService {
   @Autowired
   private SlPlatformDeviceMobileRepository slPlatformDeviceRepo;
 
+  @Autowired
+  private PlatformGeneralizer platformGeneralizer;
+
   @Transactional
   public void syncDevicesFromSauceLabs() {
     HttpHeaders headers = createAuthHeaders();
@@ -56,13 +60,15 @@ public class SLPlatformDeviceMobileService {
         String os = (String) device.get("os");
         String osVersion = (String) device.get("osVersion");
         String deviceName = (String) device.get("name");
+        String deviceId = (String) device.get("id");
 
-        String generalizedOsName = normalizeOSName(os);
-        String generalizedDeviceName = normalizeDeviceName(deviceName);
-        String key = generateKey(generalizedOsName, osVersion, generalizedDeviceName);
+        String generalizedOsName = platformGeneralizer.generalizeOsName(os);
+        String generalizedDeviceName = platformGeneralizer.generalizeDeviceModelName(deviceName);
+        String generalizedOSVersion = platformGeneralizer.generalizeVersion(osVersion);
+        String key = platformGeneralizer.generatePlatformKey(generalizedOsName, generalizedOSVersion, generalizedDeviceName);
 
-        saveToPlatformDevices(generalizedOsName, osVersion, generalizedDeviceName, key);
-        saveToSlPlatformDevices(os, osVersion, deviceName, key);
+        saveToPlatformDevices(generalizedOsName, generalizedOSVersion, generalizedDeviceName, key);
+        saveToSlPlatformDevices(os, osVersion, deviceName, key,deviceId);
       });
     }
   }
@@ -94,7 +100,7 @@ public class SLPlatformDeviceMobileService {
     );
   }
 
-  private void saveToSlPlatformDevices(String osName, String osVersion, String deviceName, String key) {
+  private void saveToSlPlatformDevices(String osName, String osVersion, String deviceName, String key, String deviceId) {
     boolean exists = slPlatformDeviceRepo.existsByPlatformKey(key);
     if (exists){ return;}
     SlPlatformDeviceMobile slDevice = new SlPlatformDeviceMobile();
@@ -102,18 +108,8 @@ public class SLPlatformDeviceMobileService {
     slDevice.setOsName(osName);
     slDevice.setOsVersion(osVersion);
     slDevice.setDeviceName(deviceName);
+    slDevice.setDeviceId(deviceId);
     slPlatformDeviceRepo.save(slDevice);
   }
 
-  private String normalizeOSName(String os) {
-    return os.toLowerCase();
-  }
-
-  private String normalizeDeviceName(String deviceName) {
-    return deviceName.toLowerCase();
-  }
-
-  private String generateKey(String osName, String osVersion, String deviceName) {
-    return osName + "-" + osVersion + "-" + deviceName;
-  }
 }

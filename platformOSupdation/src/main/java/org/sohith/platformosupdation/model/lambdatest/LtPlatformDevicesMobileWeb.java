@@ -28,6 +28,9 @@ public class LtPlatformDevicesMobileWeb {
   @Column(name = "browser_name")
   private String browserName;
 
+  @Column(name = "os_id")
+  private String osId;
+
 
   @ManyToOne
   @JoinColumn(name = "platform_key", referencedColumnName = "platform_key", insertable = false, updatable = false)

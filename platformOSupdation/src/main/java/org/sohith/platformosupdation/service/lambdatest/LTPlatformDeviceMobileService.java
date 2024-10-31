@@ -5,6 +5,7 @@ import org.sohith.platformosupdation.model.PlatformDeviceMobile;
 import org.sohith.platformosupdation.model.lambdatest.LTPlatformDeviceMobile;
 import org.sohith.platformosupdation.repo.PlatformDeviceMobileRepository;
 import org.sohith.platformosupdation.repo.lambdatest.LTPlatformDeviceMobileRepository;
+import org.sohith.platformosupdation.service.PlatformGeneralizer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -33,6 +34,9 @@ public class LTPlatformDeviceMobileService {
   @Autowired
   private LTPlatformDeviceMobileRepository ltPlatformDeviceMobileRepository;
 
+  @Autowired
+  private PlatformGeneralizer generalizer;
+
   @Transactional
   public void syncDevicesFromSauceLabs() {
     HttpEntity<String> entity = new HttpEntity<>(null);
@@ -47,22 +51,23 @@ public class LTPlatformDeviceMobileService {
       if (mobilePlatforms != null) {
         log.info("Found {} mobile platforms", mobilePlatforms.size());
 
-        // Iterate through each platform (iOS, Android, etc.)
+
         mobilePlatforms.forEach(platformData -> {
           String os = (String) platformData.get("platform");
           List<Map<String, Object>> devices = (List<Map<String, Object>>) platformData.get("devices");
 
-          // Process each device for the given platform
+
           if (devices != null) {
             devices.forEach(device -> {
               String deviceName = (String) device.get("device_name");
               String osVersion = (String) device.get("version");
 
-              String generalizedOsName = normalizeOSName(os);
-              String generalizedDeviceName = normalizeDeviceName(deviceName);
-              String key = generateKey(generalizedOsName, osVersion, generalizedDeviceName);
+              String generalizedOsName = generalizer.generalizeOsName (os);
+              String generalizedDeviceName = generalizer.generalizeDeviceModelName(deviceName);
+              String generalizedOSVersion = generalizer.generalizeVersion(osVersion);
+              String key = generalizer.generatePlatformKey(generalizedOsName, generalizedOSVersion, generalizedDeviceName);
 
-              saveToPlatformDevices(generalizedOsName, osVersion, generalizedDeviceName, key);
+              saveToPlatformDevices(generalizedOsName, generalizedOSVersion, generalizedDeviceName, key);
               saveToSlPlatformDevices(os, osVersion, deviceName, key);
             });
           }
@@ -104,15 +109,4 @@ public class LTPlatformDeviceMobileService {
     ltPlatformDeviceMobileRepository.save(ltDevice);
   }
 
-  private String normalizeOSName(String os) {
-    return os.toLowerCase();
-  }
-
-  private String normalizeDeviceName(String deviceName) {
-    return deviceName.toLowerCase();
-  }
-
-  private String generateKey(String osName, String osVersion, String deviceName) {
-    return osName + "-" + osVersion + "-" + deviceName;
-  }
 }

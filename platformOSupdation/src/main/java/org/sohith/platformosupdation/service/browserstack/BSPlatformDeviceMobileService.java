@@ -5,6 +5,7 @@ import org.sohith.platformosupdation.model.PlatformDeviceMobile;
 import org.sohith.platformosupdation.model.browserstack.BSPlatformDeviceMobile;
 import org.sohith.platformosupdation.repo.PlatformDeviceMobileRepository;
 import org.sohith.platformosupdation.repo.browserstack.BSPlatformDeviceMobileRepository;
+import org.sohith.platformosupdation.service.PlatformGeneralizer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -32,6 +33,9 @@ public class BSPlatformDeviceMobileService {
   private String apiAccessKey;
 
   @Autowired
+  private PlatformGeneralizer generalizer;
+
+  @Autowired
   private RestTemplate restTemplate;
 
   @Autowired
@@ -50,18 +54,18 @@ public class BSPlatformDeviceMobileService {
 
     log.info("Found {} devices", devices != null ? devices.size() : 0);
 
-
     if (devices != null) {
       devices.forEach(device -> {
         String os = (String) device.get("os");
         String osVersion = (String) device.get("os_version");
         String deviceName = (String) device.get("device");
 
-        String generalizedOsName = normalizeOSName(os);
-        String generalizedDeviceName = normalizeDeviceName(deviceName);
-        String key = generateKey(generalizedOsName, osVersion, generalizedDeviceName);
+        String generalizedOsName = generalizer.generalizeOsName(os);
+        String generalizedOsVersion = generalizer.generalizeVersion(osVersion);
+        String generalizedDeviceName = generalizer.generalizeDeviceModelName(deviceName);
+        String key = generalizer.generatePlatformKey(generalizedOsName, osVersion, generalizedDeviceName);
 
-        saveToPlatformDevices(generalizedOsName, osVersion, generalizedDeviceName, key);
+        saveToPlatformDevices(generalizedOsName, generalizedOsVersion, generalizedDeviceName, key);
         saveToSlPlatformDevices(os, osVersion, deviceName, key);
       });
     }
@@ -105,15 +109,4 @@ public class BSPlatformDeviceMobileService {
     bsPlatformDeviceRepo.save(bsDevice);
   }
 
-  private String normalizeOSName(String os) {
-    return os.toLowerCase();
-  }
-
-  private String normalizeDeviceName(String deviceName) {
-    return deviceName.toLowerCase();
-  }
-
-  private String generateKey(String osName, String osVersion, String deviceName) {
-    return osName + "-" + osVersion + "-" + deviceName;
-  }
 }

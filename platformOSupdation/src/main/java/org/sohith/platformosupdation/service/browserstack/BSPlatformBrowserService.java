@@ -5,6 +5,7 @@ import org.sohith.platformosupdation.model.PlatformBrowsers;
 import org.sohith.platformosupdation.model.browserstack.BsPlatformBrowsers;
 import org.sohith.platformosupdation.repo.PlatformBrowsersRepository;
 import org.sohith.platformosupdation.repo.browserstack.BsPlatformBrowsersRepository;
+import org.sohith.platformosupdation.service.PlatformGeneralizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -43,6 +44,9 @@ public class BSPlatformBrowserService {
   @Autowired
   private BsPlatformBrowsersRepository bsPlatformBrowsersRepository;
 
+  @Autowired
+  private PlatformGeneralizer platformGeneralizer;
+
   @Transactional
   public void syncDevicesFromBrowserStack() {
     HttpHeaders headers = createAuthHeaders();
@@ -60,17 +64,15 @@ public class BSPlatformBrowserService {
             String browserName = (String) device.get("browser");
             String browserVersion = (String) device.get("browser_version");
 
-            // Check for null values before processing
-            if (os == null || osVersion == null || browserName == null || browserVersion == null) {
-              log.warn("Skipping device due to null values: {}", device);
-              return;
-            }
 
-            String generalizedOsName = normalizeOSName(os);
-            String generalizedBrowserVersion = normalizeDeviceName(browserVersion);
-            String key = generateKey(generalizedOsName, osVersion, generalizedBrowserVersion, browserName);
 
-            saveToPlatformDevices(generalizedOsName, osVersion, generalizedBrowserVersion, browserName, key);
+            String generalizedOsName = platformGeneralizer.generalizeOsName(os);
+            String generalizedOSVersion = platformGeneralizer.generalizeVersion(osVersion);
+            String generalizedBrowserVersion = platformGeneralizer.generalizeVersion(browserVersion);
+            String generalizedBrowserName = platformGeneralizer.generalizeBrowserName(browserName);
+            String key = platformGeneralizer.generatePlatformKey(generalizedOsName, generalizedOSVersion, generalizedBrowserName, generalizedBrowserVersion);
+
+            saveToPlatformDevices(generalizedOsName, generalizedOSVersion, generalizedBrowserVersion, generalizedBrowserName, key);
             saveToBsPlatformDevices(os, osVersion, browserVersion, browserName, key);
           });
     } else {
@@ -122,15 +124,4 @@ public class BSPlatformBrowserService {
     bsPlatformBrowsersRepository.save(bsDevice);
   }
 
-  private String normalizeOSName(String os) {
-    return os.toLowerCase();
-  }
-
-  private String normalizeDeviceName(String deviceName) {
-    return deviceName.toLowerCase();
-  }
-
-  private String generateKey(String osName, String osVersion, String deviceName, String browserName) {
-    return osName + "-" + osVersion + "-" + deviceName + "-" + browserName;
-  }
 }

@@ -55,7 +55,7 @@ public class SLPlatformDeviceMobileWebService {
           .forEach(device -> {
             String os = (String) device.get("api_name");
             String osVersion = (String) device.get("short_version");
-            String deviceName = (String) device.get("long_name");
+            String deviceName = (String) device.get("device");
 
             // Normalize OS name to "ios" if the api_name is apple or ipad, otherwise keep the original os name
             String generalizedOsName = normalizeOSName(os);

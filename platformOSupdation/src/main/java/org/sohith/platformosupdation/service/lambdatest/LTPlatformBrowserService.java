@@ -4,6 +4,7 @@ import org.sohith.platformosupdation.model.PlatformBrowsers;
 import org.sohith.platformosupdation.model.lambdatest.LtPlatformBrowsers;
 import org.sohith.platformosupdation.repo.PlatformBrowsersRepository;
 import org.sohith.platformosupdation.repo.lambdatest.LtPlatformBrowsersRepository;
+import org.sohith.platformosupdation.service.PlatformGeneralizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -30,6 +31,8 @@ public class LTPlatformBrowserService {
   private PlatformBrowsersRepository platformBrowsersRepository;
   @Autowired
   private LtPlatformBrowsersRepository ltPlatformBrowsersRepository;
+  @Autowired
+  private PlatformGeneralizer platformGeneralizer;
 
   @Transactional
   public void syncDevicesFromLambdaTest() {
@@ -47,22 +50,35 @@ public class LTPlatformBrowserService {
 
         desktopPlatforms.forEach(platformData -> {
           String platform = (String) platformData.get("platform");
-          String osName = platform.split(" ")[0];
-          String osVersion = platform.substring(platform.indexOf(" ") + 1);
+          platform = platform.trim();
+          String osName;
+          String osVersion;
+          if (platform.toLowerCase().contains("os x")){
+            osName = "os x";
+            osVersion = platform.substring(platform.indexOf("X") + 1);
+          }
+          else{
+            osName = platform.split(" ")[0];
+            osVersion = platform.substring(platform.indexOf(" ") + 1);
+          }
+
 
           List<Map<String, String>> browsers = (List<Map<String, String>>) platformData.get("browsers");
 
+          String finalPlatform = platform;
           browsers.forEach(browser -> {
             String browserName = browser.get("browser_name");
             String browserVersion = browser.get("version");
 
-            String generalizedOsName = normalizeOSName(osName);
-            String generalizedBrowser = normalizeBrowserName(browserName);
-            String generalizedOsVersion = normalizeOSVersion(browserVersion);
-            String platformKey = generatePlatformKey(osName, osVersion, browserName, browserVersion);
+            String generalizedOsName = platformGeneralizer.generalizeOsName(osName);
+            String generalizedBrowser = platformGeneralizer.generalizeBrowserName(browserName);
+            String generalizedOsVersion = platformGeneralizer.generalizeVersion(osVersion);
+            String generalizedBrowserVersion = platformGeneralizer.generalizeVersion(browserVersion);
 
-            saveToPlatformBrowsers(generalizedOsName, generalizedOsVersion, generalizedBrowser, browserVersion, platformKey);
-            saveToLtPlatformBrowsers(osName, osVersion, browserName, browserVersion, platformKey);
+            String platformKey = platformGeneralizer.generatePlatformKey(generalizedOsName, generalizedOsVersion, generalizedBrowser, generalizedBrowserVersion);
+
+            saveToPlatformBrowsers(generalizedOsName, generalizedOsVersion, generalizedBrowser, generalizedBrowserVersion, platformKey);
+            saveToLtPlatformBrowsers(finalPlatform, finalPlatform, browserName, browserVersion, platformKey);
           });
         });
       } else {
@@ -74,9 +90,7 @@ public class LTPlatformBrowserService {
   }
 
 
-  private String generatePlatformKey(String osName, String osVersion, String browserName, String browserVersion) {
-    return osName + "-" + osVersion + "-" + browserName + "-" + browserVersion;
-  }
+
 
   private void saveToPlatformBrowsers(String osName, String osVersion, String browserName, String browserVersion, String platformKey) {
     platformBrowsersRepository.findByPlatformKey(platformKey).ifPresentOrElse(
@@ -110,15 +124,5 @@ public class LTPlatformBrowserService {
     }
   }
 
-  private String normalizeOSName(String os) {
-    return os.toLowerCase();
-  }
 
-  private String normalizeOSVersion(String version) {
-    return version.toLowerCase();
-  }
-
-  private String normalizeBrowserName(String browserName) {
-    return browserName.toLowerCase();
-  }
 }

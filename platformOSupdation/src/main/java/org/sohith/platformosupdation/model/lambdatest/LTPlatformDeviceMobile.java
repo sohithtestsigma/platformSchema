@@ -17,5 +17,6 @@ public class LTPlatformDeviceMobile {
   private String osName;
   private String osVersion;
   private String deviceName;
+  private String deviceId;
 
 }

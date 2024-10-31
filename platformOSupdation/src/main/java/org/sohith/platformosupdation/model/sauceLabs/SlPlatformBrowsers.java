@@ -1,4 +1,4 @@
-package org.sohith.platformosupdation.model.saucelabs;
+package org.sohith.platformosupdation.model.sauceLabs;
 
 import jakarta.persistence.*;
 import lombok.Data;

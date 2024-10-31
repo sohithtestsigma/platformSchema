@@ -40,16 +40,20 @@ public class HelloController {
   public String sayHello() {
 
 //    bsPlatformDeviceMobileService.syncDevicesFromSauceLabs();
-//    bsPlatformBrowserService.syncDevicesFromBrowserStack();
-//    bsPlatformDeviceMobileWebService.syncDevicesFromBrowserStack();
-
 //    ltpPlatformDeviceMobileService.syncDevicesFromSauceLabs();
-//    ltpPlatformDeviceMobileWebService.syncDevicesFromLambdaTest();
-//    ltPlatformBrowserService.syncDevicesFromLambdaTest();
-//
+//    slPlatformDeviceMobileService.syncDevicesFromSauceLabs();
+
+
+//    bsPlatformDeviceMobileWebService.syncDevicesFromBrowserStack();
+//     ltpPlatformDeviceMobileWebService.syncDevicesFromLambdaTest();
+//    --- Doubt sauce labs  browser ? os wrong ...
     slPlatformDeviceMobileWebService.syncDevicesFromSauceLabs();
-    slPlatformBrowserService.syncDevicesFromSauceLabs();
-    slPlatformDeviceMobileService.syncDevicesFromSauceLabs();
+
+
+//    bsPlatformBrowserService.syncDevicesFromBrowserStack();
+//    ltPlatformBrowserService.syncDevicesFromLambdaTest();
+//    slPlatformBrowserService.syncDevicesFromSauceLabs();
+
 
 
     return "Hello";

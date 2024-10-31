@@ -1,9 +1,10 @@
 package org.sohith.platformosupdation.service.sauceLabs;
 
 import org.sohith.platformosupdation.model.PlatformBrowsers;
-import org.sohith.platformosupdation.model.saucelabs.SlPlatformBrowsers;
+import org.sohith.platformosupdation.model.sauceLabs.SlPlatformBrowsers;
 import org.sohith.platformosupdation.repo.PlatformBrowsersRepository;
 import org.sohith.platformosupdation.repo.sauceLabs.SlPlatformBrowsersRepository;
+import org.sohith.platformosupdation.service.PlatformGeneralizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -36,6 +37,8 @@ public class SLPlatformBrowserService {
   private PlatformBrowsersRepository platformBrowsersRepository;
   @Autowired
   private SlPlatformBrowsersRepository slPlatformBrowsersRepository;
+  @Autowired
+  private PlatformGeneralizer platformGeneralizer;
 
   @Transactional
   public void syncDevicesFromSauceLabs() {
@@ -52,29 +55,29 @@ public class SLPlatformBrowserService {
           return;
         }
 
+
         String os = (String) device.get("os");
         String osName = os.split(" ")[0];
         String osVersion = os.split(" ").length > 1 ? os.split(" ")[1] : "";
 
-        String browserName = (String) device.get("long_name");
+        String browserName = (String) device.get("api_name");
         String browserVersion = (String) device.get("short_version");
 
-        String generalizedOsName = normalizeOSName(osName);
-        String generalizedBrowser = normalizeBrowserName(browserName);
-        String generalizedOsVersion = normalizeOSVersion(browserVersion);
-        String platformKey = generatePlatformKey(generalizedOsName, generalizedOsVersion, generalizedBrowser, browserVersion);
+        String generalizedOsName = platformGeneralizer.generalizeOsName(osName);
+        String generalizedBrowser = platformGeneralizer.generalizeBrowserName(browserName);
+        String generalizedOsVersion = platformGeneralizer.generalizeVersion(osVersion);
+        String generalizedBrowserVersion = platformGeneralizer.generalizeVersion(browserVersion);
+        String platformKey = platformGeneralizer.generatePlatformKey(generalizedOsName, generalizedOsVersion, generalizedBrowser, generalizedBrowserVersion);
 
-        saveToPlatformBrowsers(generalizedOsName, generalizedOsVersion, generalizedBrowser, browserVersion, platformKey);
-        saveToSlPlatformBrowsers(osName, osVersion, browserName, browserVersion, platformKey);
+        saveToPlatformBrowsers(generalizedOsName, generalizedOsVersion, generalizedBrowser, generalizedBrowserVersion, platformKey);
+        saveToSlPlatformBrowsers(os, os, browserName, browserVersion, platformKey);
       });
     } else {
       System.out.println("No data received from Sauce Labs API.");
     }
   }
 
-  private String generatePlatformKey(String osName, String osVersion, String browserName, String browserVersion) {
-    return osName + "-" + osVersion + "-" + browserName + "-" + browserVersion;
-  }
+
 
   private void saveToPlatformBrowsers(String osName, String osVersion, String browserName, String browserVersion, String platformKey) {
     Optional<PlatformBrowsers> existingPlatform = platformBrowsersRepository.findByPlatformKey(platformKey);
@@ -87,6 +90,10 @@ public class SLPlatformBrowserService {
       platformBrowsers.setBrowserVersion(browserVersion);
       platformBrowsers.setIsSlSupported(true);
       platformBrowsersRepository.save(platformBrowsers);
+    }
+    else {
+      existingPlatform.get().setPlatformKey(platformKey);
+      platformBrowsersRepository.save(existingPlatform.get());
     }
   }
 
@@ -102,15 +109,4 @@ public class SLPlatformBrowserService {
     }
   }
 
-  private String normalizeOSName(String os) {
-    return os.toLowerCase();
-  }
-
-  private String normalizeOSVersion(String version) {
-    return version.toLowerCase();
-  }
-
-  private String normalizeBrowserName(String browserName) {
-    return browserName.toLowerCase();
-  }
 }
