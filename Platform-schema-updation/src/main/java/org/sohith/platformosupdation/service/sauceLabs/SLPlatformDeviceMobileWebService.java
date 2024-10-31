@@ -5,6 +5,7 @@ import org.sohith.platformosupdation.model.PlatformDevicesMobileWeb;
 import org.sohith.platformosupdation.model.sauceLabs.SlPlatformDevicesMobileWeb;
 import org.sohith.platformosupdation.repo.PlatformDevicesMobileWebRepository;
 import org.sohith.platformosupdation.repo.sauceLabs.SlPlatformDevicesMobileWebRepository;
+import org.sohith.platformosupdation.service.PlatformGeneralizer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -42,6 +43,9 @@ public class SLPlatformDeviceMobileWebService {
   @Autowired
   private SlPlatformDevicesMobileWebRepository slPlatformDevicesMobileWebRepo;
 
+  @Autowired
+  private PlatformGeneralizer platformGeneralizer;
+
   @Transactional
   public void syncDevicesFromSauceLabs() {
     HttpHeaders headers = createAuthHeaders();
@@ -57,17 +61,15 @@ public class SLPlatformDeviceMobileWebService {
             String osVersion = (String) device.get("short_version");
             String deviceName = (String) device.get("device");
 
-            // Normalize OS name to "ios" if the api_name is apple or ipad, otherwise keep the original os name
-            String generalizedOsName = normalizeOSName(os);
+            String generalizedOsName = platformGeneralizer.generalizeOsName(os);
+            String generalizedOsVersion = platformGeneralizer.generalizeVersion(osVersion);
+            String generalizedBrowser = platformGeneralizer.generalizeBrowserName(os);
+            String generalizedDeviceName = platformGeneralizer.generalizeDeviceModelName(deviceName);
 
-            // Set browser based on OS: Safari for iOS devices, Chrome for others
-            String browserName = generalizedOsName.equals("ios") ? "safari" : "chrome";
+            String key = platformGeneralizer.generatePlatformKey(generalizedOsName, generalizedOsVersion, generalizedDeviceName, generalizedBrowser);
 
-            String generalizedDeviceName = normalizeDeviceName(deviceName);
-            String key = generateKey(generalizedOsName, osVersion, generalizedDeviceName, browserName);
-
-            saveToPlatformDevices(generalizedOsName, osVersion, generalizedDeviceName, browserName, key);
-            saveToSlPlatformDevices(os, osVersion, deviceName, browserName, key);
+            saveToPlatformDevices(generalizedOsName, generalizedOsVersion, generalizedDeviceName, generalizedBrowser, key);
+            saveToSlPlatformDevices(os, osVersion, deviceName, generalizedBrowser, key);
           });
     } else {
       log.warn("No device data found in Sauce Labs response.");
@@ -84,13 +86,6 @@ public class SLPlatformDeviceMobileWebService {
     return headers;
   }
 
-
-  private String normalizeOSName(String os) {
-    if ("apple".equalsIgnoreCase(os) || "ipad".equalsIgnoreCase(os)) {
-      return "ios";
-    }
-    return os.toLowerCase();
-  }
 
   private void saveToPlatformDevices(String osName, String osVersion, String deviceName, String browserName, String key) {
     platformDevicesRepo.findByPlatformKey(key).ifPresentOrElse(
@@ -124,11 +119,4 @@ public class SLPlatformDeviceMobileWebService {
     slPlatformDevicesMobileWebRepo.save(slDevice);
   }
 
-  private String normalizeDeviceName(String deviceName) {
-    return deviceName.toLowerCase();
-  }
-
-  private String generateKey(String osName, String osVersion, String deviceName, String browserName) {
-    return osName + "-" + osVersion + "-" + deviceName + "-" + browserName;
-  }
 }
