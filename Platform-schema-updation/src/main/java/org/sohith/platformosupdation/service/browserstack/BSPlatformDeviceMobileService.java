@@ -57,7 +57,7 @@ public class BSPlatformDeviceMobileService {
         String deviceName = (String) device.get("device");
 
         String generalizedOsName = generalizer.generalizeOsName(os);
-        String generalizedOsVersion = generalizer.generalizeVersion(osVersion);
+        String generalizedOsVersion = generalizer.generalizeOsVersion(osVersion);
         String generalizedDeviceName = generalizer.generalizeDeviceModelName(deviceName);
         String key = generalizer.generatePlatformKey(generalizedOsName, osVersion, generalizedDeviceName);
 

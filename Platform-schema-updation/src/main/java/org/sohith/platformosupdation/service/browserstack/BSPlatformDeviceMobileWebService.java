@@ -60,7 +60,7 @@ public class BSPlatformDeviceMobileWebService {
 
             String generalizedOsName = platformGeneralizer.generalizeOsName(os);
             String generalizedDeviceName = platformGeneralizer.generalizeDeviceModelName(deviceName);
-            String generalizedOsVersion = platformGeneralizer.generalizeVersion(osVersion);
+            String generalizedOsVersion = platformGeneralizer.generalizeOsVersion(osVersion);
             String generalizedBrowserName = platformGeneralizer.generalizeBrowserName(browserName);
             String key = platformGeneralizer.generatePlatformKey(generalizedOsName, generalizedOsVersion, generalizedDeviceName, generalizedBrowserName);
 

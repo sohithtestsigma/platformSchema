@@ -21,25 +21,5 @@ public class HelixSupportUpdateService {
   @Autowired
   private PlatformDevicesMobileWebRepository platformDevicesMobileWebRepository;
 
-  @Transactional
-  public void updateHelixSupportForAllPlatforms() {
-    updateHelixSupportForPlatformBrowsers();
-    updateHelixSupportForPlatformDevicesMobile();
-    updateHelixSupportForPlatformDevicesMobileWeb();
-  }
 
-  private void updateHelixSupportForPlatformBrowsers() {
-    int updatedCount = platformBrowsersRepository.updateHelixSupportForEligibleRecords();
-    log.info("Updated helix_supported to true for {} records in platform_browsers", updatedCount);
-  }
-
-  private void updateHelixSupportForPlatformDevicesMobile() {
-    int updatedCount = platformDevicesMobileRepository.updateHelixSupportForEligibleRecords();
-    log.info("Updated helix_supported to true for {} records in platform_devices_mobile", updatedCount);
-  }
-
-  private void updateHelixSupportForPlatformDevicesMobileWeb() {
-    int updatedCount = platformDevicesMobileWebRepository.updateHelixSupportForEligibleRecords();
-    log.info("Updated helix_supported to true for {} records in platform_devices_mobile_web", updatedCount);
-  }
 }

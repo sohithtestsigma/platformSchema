@@ -59,7 +59,7 @@ public class SLPlatformDeviceMobileWebService {
             String deviceName = (String) device.get("device");
 
             String generalizedOsName = platformGeneralizer.generalizeOsName(os);
-            String generalizedOsVersion = platformGeneralizer.generalizeVersion(osVersion);
+            String generalizedOsVersion = platformGeneralizer.generalizeOsVersion(osVersion);
             String generalizedBrowser = platformGeneralizer.generalizeBrowserName(os);
             String generalizedDeviceName = platformGeneralizer.generalizeDeviceModelName(deviceName);
 

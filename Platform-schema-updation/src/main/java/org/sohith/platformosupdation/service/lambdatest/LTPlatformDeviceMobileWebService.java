@@ -66,7 +66,7 @@ public class LTPlatformDeviceMobileWebService {
               String osVersion = (String) osVersionData.get("version");
               String osId = (String) osVersionData.get("id");
 
-              String generalizedOSVersion = platformGeneralizer.generalizeVersion(osVersion);
+              String generalizedOSVersion = platformGeneralizer.generalizeOsVersion(osVersion);
 
               String key = platformGeneralizer.generatePlatformKey(generalizedOSName, generalizedOSVersion, generalizedDeviceName, generalizedBrowserName);
 

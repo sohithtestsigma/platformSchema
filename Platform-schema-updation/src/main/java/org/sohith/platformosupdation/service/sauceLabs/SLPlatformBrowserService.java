@@ -67,12 +67,15 @@ public class SLPlatformBrowserService {
 
         String generalizedOsName = platformGeneralizer.generalizeOsName(osName);
         String generalizedBrowser = platformGeneralizer.generalizeBrowserName(browserName);
-        String generalizedOsVersion = platformGeneralizer.generalizeVersion(osVersion);
-        String generalizedBrowserVersion = platformGeneralizer.generalizeVersion(browserVersion);
+        String generalizedOsVersion = platformGeneralizer.generalizeOsVersion(osVersion);
+        String generalizedBrowserVersion = platformGeneralizer.generalizeBrowserVersion(browserVersion);
         String platformKey = platformGeneralizer.generatePlatformKey(generalizedOsName, generalizedOsVersion, generalizedBrowser, generalizedBrowserVersion);
 
-        saveToPlatformBrowsers(generalizedOsName, generalizedOsVersion, generalizedBrowser, generalizedBrowserVersion, platformKey);
-        saveToSlPlatformBrowsers(os, os, browserName, browserVersion, platformKey);
+        if (platformGeneralizer.isLatestOsVersion(generalizedOsVersion) && platformGeneralizer.isLatestBrowserVersion(generalizedBrowserVersion)) {
+          saveToPlatformBrowsers(generalizedOsName, generalizedOsVersion, generalizedBrowser, generalizedBrowserVersion, platformKey);
+          saveToSlPlatformBrowsers(os, os, browserName, browserVersion, platformKey);
+        }
+
       });
     } else {
       System.out.println("No data received from Sauce Labs API.");
@@ -82,21 +85,22 @@ public class SLPlatformBrowserService {
 
 
   private void saveToPlatformBrowsers(String osName, String osVersion, String browserName, String browserVersion, String platformKey) {
-    Optional<PlatformBrowsers> existingPlatform = platformBrowsersRepository.findByPlatformKey(platformKey);
-    if (existingPlatform.isEmpty()) {
-      PlatformBrowsers platformBrowsers = new PlatformBrowsers();
-      platformBrowsers.setPlatformKey(platformKey);
-      platformBrowsers.setOsName(osName);
-      platformBrowsers.setOsVersion(osVersion);
-      platformBrowsers.setBrowserName(browserName);
-      platformBrowsers.setBrowserVersion(browserVersion);
-      platformBrowsers.setIsSlSupported(true);
-      platformBrowsersRepository.save(platformBrowsers);
-    }
-    else {
-      existingPlatform.get().setPlatformKey(platformKey);
-      platformBrowsersRepository.save(existingPlatform.get());
-    }
+    platformBrowsersRepository.findByPlatformKey(platformKey).ifPresentOrElse(
+        existingPlatform -> {
+          existingPlatform.setIsSlSupported(true);
+          platformBrowsersRepository.save(existingPlatform);
+        },
+        () -> {
+          PlatformBrowsers newPlatformBrowser = new PlatformBrowsers();
+          newPlatformBrowser.setPlatformKey(platformKey);
+          newPlatformBrowser.setOsName(osName);
+          newPlatformBrowser.setOsVersion(osVersion);
+          newPlatformBrowser.setBrowserName(browserName);
+          newPlatformBrowser.setBrowserVersion(browserVersion);
+          newPlatformBrowser.setIsSlSupported(true);
+          platformBrowsersRepository.save(newPlatformBrowser);
+        }
+    );
   }
 
   private void saveToSlPlatformBrowsers(String osName, String osVersion, String browserName, String browserVersion, String platformKey) {

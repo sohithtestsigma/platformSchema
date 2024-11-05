@@ -65,13 +65,17 @@ public class BSPlatformBrowserService {
 
 
             String generalizedOsName = platformGeneralizer.generalizeOsName(os);
-            String generalizedOSVersion = platformGeneralizer.generalizeVersion(osVersion);
-            String generalizedBrowserVersion = platformGeneralizer.generalizeVersion(browserVersion);
+            String generalizedOSVersion = platformGeneralizer.generalizeOsVersion(osVersion);
+            String generalizedBrowserVersion = platformGeneralizer.generalizeBrowserVersion(browserVersion);
             String generalizedBrowserName = platformGeneralizer.generalizeBrowserName(browserName);
             String key = platformGeneralizer.generatePlatformKey(generalizedOsName, generalizedOSVersion, generalizedBrowserName, generalizedBrowserVersion);
 
-            saveToPlatformDevices(generalizedOsName, generalizedOSVersion, generalizedBrowserVersion, generalizedBrowserName, key);
-            saveToBsPlatformDevices(os, osVersion, browserVersion, browserName, key);
+            if (platformGeneralizer.isLatestOsVersion(generalizedOSVersion) && platformGeneralizer.isLatestBrowserVersion(generalizedBrowserVersion)){
+              saveToPlatformDevices(generalizedOsName, generalizedOSVersion, generalizedBrowserVersion, generalizedBrowserName, key);
+              saveToBsPlatformDevices(os, osVersion, browserVersion, browserName, key);
+            }
+
+
           });
     } else {
       log.warn("No device data found in BrowserStack response.");

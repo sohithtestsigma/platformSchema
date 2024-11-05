@@ -11,11 +11,7 @@ import java.util.Optional;
 public interface PlatformBrowsersRepository extends JpaRepository<PlatformBrowsers, Integer> {
   Optional<PlatformBrowsers> findByPlatformKey(String platformKey);
 
-  @Modifying
-  @Query("UPDATE PlatformBrowsers pb SET pb.helixSupported = true WHERE pb.isLtSupported = true AND pb.isSlSupported = true AND pb.isBsSupported = true")
-  int updateHelixSupportForEligibleRecords();
-
-  @Query("SELECT pb FROM PlatformBrowsers pb WHERE pb.helixSupported = true")
+  @Query("SELECT pb FROM PlatformBrowsers pb WHERE pb.isLtSupported = true AND pb.isSlSupported = true AND pb.isBsSupported = true")
   List<PlatformBrowsers> findAllSupportedData();
 
 }

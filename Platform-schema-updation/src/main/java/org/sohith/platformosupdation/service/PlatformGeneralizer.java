@@ -15,6 +15,7 @@ public class PlatformGeneralizer {
     specialOsVersions.put("xp", "5.1");
     specialOsVersions.put("snow leopard", "10.6");
     specialOsVersions.put("lion os", "10.7");
+    specialOsVersions.put("lion", "10.7");
     specialOsVersions.put("mountain lion", "10.8");
     specialOsVersions.put("mavericks", "10.9");
     specialOsVersions.put("yosemite", "10.10");
@@ -28,6 +29,7 @@ public class PlatformGeneralizer {
     specialOsVersions.put("ventura", "13");
     specialOsVersions.put("sonoma", "14");
     specialOsVersions.put("sequoia", "15");
+
   }
 
   public  String generalizeOsName(String os) {
@@ -66,7 +68,7 @@ public class PlatformGeneralizer {
     return "Unknown Browser";
   }
 
-  public String generalizeVersion(String version) {
+  public String generalizeOsVersion(String version) {
     version = version.trim().toLowerCase();
 
     // Check if the version matches a special OS version
@@ -92,6 +94,14 @@ public class PlatformGeneralizer {
     }
   }
 
+
+  public  String generalizeBrowserVersion(String version) {
+    version = version.split(" ")[0];
+    String[] versionParts = version.split("\\.");
+    return versionParts[0];
+  }
+
+
   public  String generatePlatformKey(String os, String osVersion, String browser, String browserVersion) {
     return String.format("%s-%s-%s-%s", os, osVersion, browser, browserVersion);
   }
@@ -103,4 +113,25 @@ public class PlatformGeneralizer {
   public  String generalizeDeviceModelName(String modelName) {
     return modelName.trim();
   }
+
+  public boolean isLatestBrowserVersion(String version) {
+    try {
+      int majorVersion = Integer.parseInt(version.split("\\.")[0]);
+      return majorVersion > 35;
+    } catch (NumberFormatException e) {
+      System.out.println("Invalid version format: " + version);
+      return false;
+    }
+  }
+
+  public boolean isLatestOsVersion(String osVersion) {
+    try {
+      int majorVersion = Integer.parseInt(osVersion.split("\\.")[0]);
+        return majorVersion > 5 && majorVersion < 15;
+    } catch (NumberFormatException e) {
+      System.out.println("Invalid version format: " + osVersion);
+      return false;
+    }
+  }
+
 }

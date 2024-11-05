@@ -73,13 +73,15 @@ public class LTPlatformBrowserService {
 
             String generalizedOsName = platformGeneralizer.generalizeOsName(osName);
             String generalizedBrowser = platformGeneralizer.generalizeBrowserName(browserName);
-            String generalizedOsVersion = platformGeneralizer.generalizeVersion(osVersion);
-            String generalizedBrowserVersion = platformGeneralizer.generalizeVersion(browserVersion);
+            String generalizedOsVersion = platformGeneralizer.generalizeOsVersion(osVersion);
+            String generalizedBrowserVersion = platformGeneralizer.generalizeBrowserVersion(browserVersion);
 
             String platformKey = platformGeneralizer.generatePlatformKey(generalizedOsName, generalizedOsVersion, generalizedBrowser, generalizedBrowserVersion);
 
-            saveToPlatformBrowsers(generalizedOsName, generalizedOsVersion, generalizedBrowser, generalizedBrowserVersion, platformKey);
-            saveToLtPlatformBrowsers(finalPlatform, finalPlatform, browserName, browserVersion, platformKey);
+            if (platformGeneralizer.isLatestOsVersion(generalizedOsVersion) && platformGeneralizer.isLatestBrowserVersion(generalizedBrowserVersion)) {
+              saveToPlatformBrowsers(generalizedOsName, generalizedOsVersion, generalizedBrowser, generalizedBrowserVersion, platformKey);
+              saveToLtPlatformBrowsers(finalPlatform, finalPlatform, browserName, browserVersion, platformKey);
+            }
           });
         });
       } else {

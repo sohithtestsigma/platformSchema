@@ -27,7 +27,6 @@ public class UpdateController {
   private final SLPlatformBrowserService slPlatformBrowserService;
   private final LTPlatformBrowserService ltPlatformBrowserService;
   private final BSPlatformBrowserService bsPlatformBrowserService;
-  private final HelixSupportUpdateService helixSupportUpdateService;
 
 
 
@@ -48,9 +47,6 @@ public class UpdateController {
     bsPlatformBrowserService.syncDevicesFromBrowserStack();
     ltPlatformBrowserService.syncDevicesFromLambdaTest();
     slPlatformBrowserService.syncDevicesFromSauceLabs();
-
-    helixSupportUpdateService.updateHelixSupportForAllPlatforms();
-
 
     return "updated successfully";
 

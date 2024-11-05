@@ -28,7 +28,6 @@ public class DataUpdateScheduler {
   private final  SLPlatformBrowserService slPlatformBrowserService;
   private final  LTPlatformBrowserService ltPlatformBrowserService;
   private final  BSPlatformBrowserService bsPlatformBrowserService;
-  private final  HelixSupportUpdateService helixSupportUpdateService;
 
   // Schedule to run at midnight every day
   @Scheduled(cron = "0 0 0 * * *")
@@ -48,7 +47,5 @@ public class DataUpdateScheduler {
     ltPlatformBrowserService.syncDevicesFromLambdaTest();
     slPlatformBrowserService.syncDevicesFromSauceLabs();
 
-    // Update helix_supported flag for all platforms
-    helixSupportUpdateService.updateHelixSupportForAllPlatforms();
   }
 }

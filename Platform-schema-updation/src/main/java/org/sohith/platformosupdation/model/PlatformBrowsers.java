@@ -36,6 +36,5 @@ public class PlatformBrowsers {
   @Column(name = "is_sl_supported")
   private Boolean isSlSupported;
 
-  @Column(name = "helix_supported")
-  private Boolean helixSupported;
+
 }

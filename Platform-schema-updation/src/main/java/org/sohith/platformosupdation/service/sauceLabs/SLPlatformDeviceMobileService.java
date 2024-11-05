@@ -59,7 +59,7 @@ public class SLPlatformDeviceMobileService {
 
         String generalizedOsName = platformGeneralizer.generalizeOsName(os);
         String generalizedDeviceName = platformGeneralizer.generalizeDeviceModelName(deviceName);
-        String generalizedOSVersion = platformGeneralizer.generalizeVersion(osVersion);
+        String generalizedOSVersion = platformGeneralizer.generalizeOsVersion(osVersion);
         String key = platformGeneralizer.generatePlatformKey(generalizedOsName, generalizedOSVersion, generalizedDeviceName);
 
         saveToPlatformDevices(generalizedOsName, generalizedOSVersion, generalizedDeviceName, key);

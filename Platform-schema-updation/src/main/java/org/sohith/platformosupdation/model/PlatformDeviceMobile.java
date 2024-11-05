@@ -20,6 +20,5 @@ public class PlatformDeviceMobile {
   private Boolean isBsSupported;
   private Boolean isLtSupported;
   private Boolean isSlSupported;
-  private Boolean helixSupported;
 
 }
